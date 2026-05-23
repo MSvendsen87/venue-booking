@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1] LOADED");
+  console.log("[VENUE BOOKING v1.1] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -136,7 +136,6 @@
     + '    <span class="gkv-chip price">800 kr / 4 timer</span>'
     + '    <span class="gkv-chip">200 kr per time</span>'
     + '    <span class="gkv-chip">Minimum 4 timer</span>'
-    + '    <span class="gkv-chip">Kun innesko eller sokker</span>'
     + '  </div>'
     + '</section>'
     + '<div class="gkv-note">Velg en ledig 4-timersblokk. Dersom dart eller disc-simulator allerede er booket i et tidsrom, blir overlappende privatkveld automatisk sperret her.</div>'
