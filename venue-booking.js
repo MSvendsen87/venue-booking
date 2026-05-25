@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1.9 REDUSERT PRIS BADGES] LOADED");
+  console.log("[VENUE BOOKING v2.0 REDUSERT PRIS TYDELIG] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -105,7 +105,7 @@
       + ".gkv-time{font-size:22px;font-weight:1000;color:#fff;letter-spacing:.2px;}"
       + ".gkv-meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}"
       + ".gkv-mini{border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;}"
-      + ".gkv-mini.price{border-color:rgba(240,193,75,.35);color:#ffe29b;background:rgba(240,193,75,.11);}"      + ".gkv-mini.price.discount{border-color:rgba(43,209,139,.55);background:linear-gradient(135deg,rgba(43,209,139,.24),rgba(43,209,139,.08));color:#bfffe0;box-shadow:0 0 0 1px rgba(43,209,139,.12) inset;}"
+      + ".gkv-mini.price{border-color:rgba(240,193,75,.35);color:#ffe29b;background:rgba(240,193,75,.11);}"      + ".gkv-mini.price.discount{border-color:rgba(255,72,72,.75)!important;background:linear-gradient(135deg,rgba(255,72,72,.30),rgba(122,18,18,.32))!important;color:#ffe2e2!important;box-shadow:0 0 0 1px rgba(255,72,72,.18) inset,0 0 14px rgba(255,72,72,.12)!important;font-size:13px!important;font-weight:1000!important;padding:8px 11px!important;letter-spacing:.01em!important;}"
       + ".gkv-mini.ok{border-color:rgba(49,210,135,.40);color:#aef5cc;background:rgba(49,210,135,.10);}"
       + ".gkv-mini.warn{border-color:rgba(255,188,88,.45);color:#ffd79a;background:rgba(255,188,88,.11);}"
       + ".gkv-mini.stop{border-color:rgba(255,100,100,.42);color:#ffb3b3;background:rgba(255,100,100,.10);}"
