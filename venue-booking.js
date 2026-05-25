@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1.6 DART SET FIX] LOADED");
+  console.log("[VENUE BOOKING v1.7 PILSETT UNLINKED] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -721,6 +721,56 @@
   /* RENDER */
   /* ------------------------------------------------ */
 
+
+  function updateDartSetButton() {
+    var btn = document.getElementById("gkv-add-dartsets");
+    if (!btn) return;
+
+    var count = getDartSetCount();
+
+    if (count > 0) {
+      btn.disabled = false;
+      btn.textContent = "Legg " + count + " pilsett i handlekurv";
+    } else {
+      btn.disabled = true;
+      btn.textContent = "Velg antall pilsett";
+    }
+  }
+
+  function bindDartSetStandaloneButton() {
+    var select = document.getElementById("gkv-dartset-count");
+    var btn = document.getElementById("gkv-add-dartsets");
+
+    if (select) {
+      select.addEventListener("change", updateDartSetButton);
+    }
+
+    if (btn) {
+      btn.onclick = function () {
+        var count = getDartSetCount();
+        if (!count || count <= 0) return;
+
+        btn.disabled = true;
+        btn.textContent = "Legger til…";
+
+        addDartSetsToCart(count, function (ok) {
+          if (ok) {
+            btn.textContent = count + " pilsett lagt i handlekurv ✓";
+            statusEl.textContent = count + " pilsett er lagt i handlekurven.";
+            setTimeout(updateDartSetButton, 1200);
+          } else {
+            btn.disabled = false;
+            btn.textContent = "Kunne ikke legge til – prøv igjen";
+            statusEl.textContent = "Kunne ikke legge pilsett i handlekurven. Prøv igjen.";
+          }
+        });
+      };
+    }
+
+    updateDartSetButton();
+  }
+
+
   function renderDays() {
     daysEl.innerHTML = "";
 
@@ -858,35 +908,24 @@
           return;
         }
 
-        var dartSetCount = getDartSetCount();
-
-        addDartSetsToCart(dartSetCount, function (extraOk) {
-          gkStoreBookingDetails({
-            item: {
-              type: "venue",
-              label: "Leie hele lokalet",
-              date: slot.date,
-              time: slot.time,
-              productId: slot.productId,
-              variantId: slot.variantId,
-              price: String(slot.price || 800)
-            },
-            extras: {
-              dartSets: dartSetCount
-            }
-          });
-
-          btn.className = "gkv-btn ok";
-          btn.textContent = "Lagt i handlekurv ✓";
-
-          if (dartSetCount > 0 && extraOk) {
-            statusEl.textContent = "Tiden og " + dartSetCount + " pilsett er lagt i handlekurven. Fullfør bestillingen for å reservere.";
-          } else if (dartSetCount > 0 && !extraOk) {
-            statusEl.textContent = "Tiden er lagt i handlekurven, men pilsett kunne ikke legges til automatisk.";
-          } else {
-            statusEl.textContent = "Tiden er lagt i handlekurven. Fullfør bestillingen for å reservere.";
+        gkStoreBookingDetails({
+          item: {
+            type: "venue",
+            label: "Leie hele lokalet",
+            date: slot.date,
+            time: slot.time,
+            productId: slot.productId,
+            variantId: slot.variantId,
+            price: String(slot.price || 800)
+          },
+          extras: {
+            dartSets: 0
           }
         });
+
+        btn.className = "gkv-btn ok";
+        btn.textContent = "Lagt i handlekurv ✓";
+        statusEl.textContent = "Tiden er lagt i handlekurven. Pilsett legges eventuelt til med egen knapp.";
       });
     };
 
