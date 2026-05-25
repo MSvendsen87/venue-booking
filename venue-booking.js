@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1.5 CLOSED TIMES] LOADED");
+  console.log("[VENUE BOOKING v1.6 DART SET FIX] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -648,18 +648,46 @@
       });
   }
 
-  function addProductToCart(productId, qty, cb) {
+  function getFirstVariantId(product) {
+    var variants = product && Array.isArray(product.variants) ? product.variants : [];
+    for (var i = 0; i < variants.length; i++) {
+      var v = variants[i] || {};
+      if (v.id) return String(v.id);
+    }
+    return "";
+  }
+
+  function addDartSetsToCart(qty, cb) {
     qty = parseInt(qty || "0", 10);
     if (isNaN(qty) || qty <= 0) {
       cb(true);
       return;
     }
 
+    var variantId = getFirstVariantId(dartSetProduct);
+
+    if (!variantId) {
+      console.log("[VENUE BOOKING] Fant ikke variant på pilsettproduktet 1318");
+      cb(false);
+      return;
+    }
+
+    /*
+      Viktig:
+      Pilsett legges inn via variant-id, ikke bare product_id.
+      Vi sender kun qty, ikke både qty og quantity, for å unngå dobbel/rar antallsøkning.
+    */
     var body =
-      "product_id=" + encodeURIComponent(String(productId)) +
+      "product_id=" + encodeURIComponent(String(PRODUCT_DART_SET)) +
+      "&variant=" + encodeURIComponent(String(variantId)) +
       "&qty=" + encodeURIComponent(String(qty)) +
-      "&quantity=" + encodeURIComponent(String(qty)) +
       "&page=product";
+
+    console.log("[VENUE BOOKING] Legger til pilsett", {
+      productId: PRODUCT_DART_SET,
+      variantId: variantId,
+      qty: qty
+    });
 
     fetch("/cart/add", {
       method: "POST",
@@ -676,7 +704,7 @@
         cb(true);
       })
       .catch(function (e) {
-        console.log("[VENUE BOOKING] addProductToCart error:", e);
+        console.log("[VENUE BOOKING] addDartSetsToCart error:", e);
         cb(false);
       });
   }
@@ -832,7 +860,7 @@
 
         var dartSetCount = getDartSetCount();
 
-        addProductToCart(PRODUCT_DART_SET, dartSetCount, function (extraOk) {
+        addDartSetsToCart(dartSetCount, function (extraOk) {
           gkStoreBookingDetails({
             item: {
               type: "venue",
