@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1.4] LOADED");
+  console.log("[VENUE BOOKING v1.5 CLOSED TIMES] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -18,6 +18,7 @@
 
   var WORKER_BASE = "https://cold-shadow-36dc.post-cd6.workers.dev";
   var API_BASE = WORKER_BASE + "/products/";
+  var CLOSED_TIMES_API = "https://gk-booking-admin.post-cd6.workers.dev/booking/closed-times";
 
   var NORMAL_BOOKING_DAYS_AHEAD = 40;
   var CUTOFF_MINUTES_BEFORE_START = 20;
@@ -220,6 +221,7 @@
   var dartBSlots = {};
   var discSlots = {};
   var clubSlots = {};
+  var dynamicClosedTimes = [];
   var dartSetProduct = null;
 
   var allDates = [];
@@ -415,6 +417,19 @@
     return map;
   }
 
+  function ruleAppliesToVenue(rule) {
+    var products = rule && rule.products;
+
+    if (products === "all") return true;
+    if (products === PRODUCT_VENUE || products === Number(PRODUCT_VENUE)) return true;
+
+    if (Array.isArray(products)) {
+      return products.map(String).indexOf(PRODUCT_VENUE) !== -1 || products.indexOf("all") !== -1;
+    }
+
+    return false;
+  }
+
   function getCustomLock(date, time) {
     for (var i = 0; i < CUSTOM_CLOSED_TIMES.length; i++) {
       var c = CUSTOM_CLOSED_TIMES[i];
@@ -425,6 +440,20 @@
         return {
           text: c.label || "Stengt",
           reason: c.label || "Dette tidsrommet er stengt."
+        };
+      }
+    }
+
+    for (var j = 0; j < dynamicClosedTimes.length; j++) {
+      var r = dynamicClosedTimes[j];
+      if (!r || r.date !== date) continue;
+      if (!ruleAppliesToVenue(r)) continue;
+
+      var dynClosedTime = String(r.from || "") + "-" + String(r.to || "");
+      if (timesOverlap(time, dynClosedTime)) {
+        return {
+          text: "Stengt",
+          reason: r.reason || r.label || "Dette tidsrommet er stengt."
         };
       }
     }
@@ -865,6 +894,20 @@
     };
   }
 
+
+  function loadClosedTimes() {
+    return fetch(CLOSED_TIMES_API, { credentials: "omit" })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        dynamicClosedTimes = res && Array.isArray(res.closedTimes) ? res.closedTimes : [];
+        console.log("[VENUE BOOKING] Stengte tider lastet", dynamicClosedTimes);
+      })
+      .catch(function (e) {
+        dynamicClosedTimes = [];
+        console.log("[VENUE BOOKING] Kunne ikke laste stengte tider:", e);
+      });
+  }
+
   /* ------------------------------------------------ */
   /* LOAD */
   /* ------------------------------------------------ */
@@ -880,6 +923,7 @@
   }
 
   Promise.all([
+    loadClosedTimes(),
     fetchProduct(PRODUCT_VENUE),
     fetchProduct(PRODUCT_A),
     fetchProduct(PRODUCT_B),
@@ -887,12 +931,12 @@
     fetchProduct(PRODUCT_CLUB),
     fetchProduct(PRODUCT_DART_SET)
   ]).then(function (res) {
-    var venue = res[0];
-    var a = res[1];
-    var b = res[2];
-    var disc = res[3];
-    var club = res[4];
-    dartSetProduct = res[5];
+    var venue = res[1];
+    var a = res[2];
+    var b = res[3];
+    var disc = res[4];
+    var club = res[5];
+    dartSetProduct = res[6];
 
     venueSlots = buildFlatIndex(PRODUCT_VENUE, venue);
     dartASlots = buildFlatIndex(PRODUCT_A, a);
