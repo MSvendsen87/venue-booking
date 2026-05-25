@@ -1,5 +1,5 @@
 (function () {
-  console.log("[VENUE BOOKING v1.7 PILSETT UNLINKED] LOADED");
+  console.log("[VENUE BOOKING v1.9 REDUSERT PRIS BADGES] LOADED");
 
   /* ------------------------------------------------ */
   /* KONFIG */
@@ -105,7 +105,7 @@
       + ".gkv-time{font-size:22px;font-weight:1000;color:#fff;letter-spacing:.2px;}"
       + ".gkv-meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}"
       + ".gkv-mini{border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;}"
-      + ".gkv-mini.price{border-color:rgba(240,193,75,.35);color:#ffe29b;background:rgba(240,193,75,.11);}"
+      + ".gkv-mini.price{border-color:rgba(240,193,75,.35);color:#ffe29b;background:rgba(240,193,75,.11);}"      + ".gkv-mini.price.discount{border-color:rgba(43,209,139,.55);background:linear-gradient(135deg,rgba(43,209,139,.24),rgba(43,209,139,.08));color:#bfffe0;box-shadow:0 0 0 1px rgba(43,209,139,.12) inset;}"
       + ".gkv-mini.ok{border-color:rgba(49,210,135,.40);color:#aef5cc;background:rgba(49,210,135,.10);}"
       + ".gkv-mini.warn{border-color:rgba(255,188,88,.45);color:#ffd79a;background:rgba(255,188,88,.11);}"
       + ".gkv-mini.stop{border-color:rgba(255,100,100,.42);color:#ffb3b3;background:rgba(255,100,100,.10);}"
@@ -383,6 +383,18 @@
     var x = Number(n || 0);
     if (isNaN(x)) x = 0;
     return String(Math.round(x)) + " kr";
+  }
+
+  function getStandardPriceForVenueSlot(slot) {
+    var duration = Number(slot && slot.durationMinutes ? slot.durationMinutes : 0);
+    if (!duration || isNaN(duration)) duration = 240;
+    return Math.round((duration / 60) * 200);
+  }
+
+  function isDiscountedVenueSlot(slot) {
+    var standard = getStandardPriceForVenueSlot(slot);
+    var price = Number(slot && slot.price);
+    return !isNaN(price) && price < standard;
   }
 
   function buildFlatIndex(productId, product) {
@@ -854,8 +866,13 @@
     top.appendChild(meta);
 
     var price = document.createElement("div");
-    price.className = "gkv-mini price";
-    price.textContent = formatPrice(slot.price || 800);
+    price.className = "gkv-mini price" + (isDiscountedVenueSlot(slot) ? " discount" : "");
+    price.textContent = isDiscountedVenueSlot(slot)
+      ? "Redusert pris " + formatPrice(slot.price || 800)
+      : formatPrice(slot.price || 800);
+    if (isDiscountedVenueSlot(slot)) {
+      price.title = "Lavere pris enn standardpris";
+    }
     meta.appendChild(price);
 
     var state = document.createElement("div");
